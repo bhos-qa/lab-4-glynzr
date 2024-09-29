@@ -12,6 +12,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     implementation("com.google.guava:guava:31.0.1-jre")
+    implementation ("org.mongodb:mongodb-driver-sync:4.9.0")
 }
 
 java {

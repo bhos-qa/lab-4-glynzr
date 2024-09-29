@@ -3,6 +3,14 @@
  */
 package org.example;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
 public class App {
 
     // 1. Calculate discount based on customer loyalty points
@@ -65,5 +73,40 @@ public class App {
     public double calculateInterest(double principal, double rate, int time) {
         return principal * rate * time / 100;
     }
-}
 
+    // 11. Vulnerable MongoDB connection (exposing credentials in logs)
+    public void connectToMongoDBVulnerable() {
+        String username = "admin";
+        String password = "admin123";
+        String dbName = "myDatabase";
+
+        try {
+            // Log sensitive data (highly insecure)
+            System.out.println("Connecting to MongoDB with username: " + username + " and password: " + password);
+
+            // Vulnerable MongoDB connection string exposing plaintext credentials
+            ConnectionString connectionString = new ConnectionString("mongodb://" + username + ":" + password + "@localhost:27017/" + dbName);
+
+            // MongoClientSettings without encryption
+            MongoClientSettings settings = MongoClientSettings.builder()
+                    .applyConnectionString(connectionString)
+                    .build();
+
+            // Creating MongoClient
+            MongoClient mongoClient = MongoClients.create(settings);
+
+            // Connecting to the database and retrieving data
+            MongoDatabase database = mongoClient.getDatabase(dbName);
+            MongoCollection<Document> collection = database.getCollection("users");
+
+            // Fetching and displaying all user documents (still insecure)
+            for (Document doc : collection.find()) {
+                System.out.println(doc.toJson()); // Exposing sensitive information
+            }
+
+            mongoClient.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
